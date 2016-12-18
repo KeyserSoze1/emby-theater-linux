@@ -12,6 +12,7 @@ function play(url, callback) {
     var command = "/usr/bin/mplayer";	
     var arguments = [
         url, 
+        '-noborder',
         '-fs', 
         '-fstype', '-none', 
         '-zoom', 
