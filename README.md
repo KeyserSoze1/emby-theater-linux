@@ -1,1 +1,1 @@
-# emby-theater-linux
+# Emby.Theater.Electron
