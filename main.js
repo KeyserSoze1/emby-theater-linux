@@ -41,8 +41,8 @@
             mainWindow.setAlwaysOnTop(false);
             mainWindow.minimize();
         } else if (state == 'Maximized') {
-            mainWindow.maximize();
-            mainWindow.setAlwaysOnTop(false);
+           // mainWindow.maximize();
+            mainWindow.setAlwaysOnTop(true);
         } else if (state == 'Fullscreen') {
             mainWindow.setFullScreen(true);
             mainWindow.setAlwaysOnTop(true);
@@ -66,7 +66,7 @@
                 mainWindow.setSize(1280, 720);
                 mainWindow.center();
             }
-            mainWindow.setAlwaysOnTop(false);
+            mainWindow.setAlwaysOnTop(true);
         }
     }
 
@@ -626,7 +626,7 @@
     var commandLineArguments = process.argv.slice(2);
 
     if (commandLineArguments.length > 0) {
-        app.setPath('userData', commandLineArguments[0]);
+        //app.setPath('userData', commandLineArguments[0]);
     }
 
     function onCecCommand(cmd) {
@@ -721,6 +721,10 @@
         //mainWindow.openDevTools();
         mainWindow.webContents.on('dom-ready', setStartInfo);
 
+
+        mainWindow.setFullScreen(true);
+        mainWindow.setAlwaysOnTop(true);
+
         var url = enableSplash ?
             'file://' + __dirname + '/splash.html' :
             getAppUrl();
@@ -754,5 +758,8 @@
         registerServerdiscovery();
 
         initCec();
+
+        var playbackhandler = require('./playbackhandler/playbackhandler');
+        playbackhandler.registerMediaPlayerProtocol(electron.protocol);
     });
 })();
