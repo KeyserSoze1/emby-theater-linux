@@ -38,7 +38,7 @@
 
         if (state == 'Minimized') {
             restoreWindowState = previousState;
-            mainWindow.setAlwaysOnTop(false);
+            mainWindow.setAlwaysOnTop(true);
             mainWindow.minimize();
         } else if (state == 'Maximized') {
            // mainWindow.maximize();
@@ -679,7 +679,7 @@
             title: 'Emby Theater',
             minWidth: 720,
             minHeight: 480,
-            //alwaysOnTop: true,
+            alwaysOnTop: true,
 
             //show: false,
             backgroundColor: '#000000',

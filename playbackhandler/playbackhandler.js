@@ -1,44 +1,30 @@
 var processes = {};
-const FIFO = require('fifo-js')
-let et_fifo = new FIFO('/tmp/et_fifo')
+var mpv=require('node-mpv');
+mpvPlayer = new mpv({
+            "ipc_command" : "--input-unix-socket",
+            "socket" : "/tmp/emby.sock",
+            "debug" : true
+            },
+            [
+             "--fullscreen",
+             "--no-osc"
+            ]);	
 
 function play(url, callback) {
-	
 	console.log('Play URL : ' + url);
-	var process = require('child_process');
-	let et_fifo = new FIFO('/tmp/et_fifo')
-    et_fifo.write('play')
-
-    var command = "/usr/bin/mplayer";	
-    var arguments = [
-        url, 
-        '-noborder',
-        '-fs', 
-        '-fstype', '-none', 
-        '-zoom', 
-        '-slave', 
-        '-input', 'file=/tmp/et_fifo',
-        '-input', 'nodefault-bindings',
-        '-noconfig', 'all'
-        ]	
-	// Start playback
-    process.execFile(command, arguments, {}, function (error, stdout, stderr) {
-		if (error) {
-			console.log('Process closed with error: ' + error);
-		}
-	});
+    mpvPlayer.loadFile(url);
 }
 
 function stop(callback) { 
-    et_fifo.write('stop')
+    mpvPlayer.stop();
 }
 
 function pause() {
-    et_fifo.write('pause')
+    mpvPlayer.pause();
 }
 
 function pause_toggle() {
-    et_fifo.write('pause')
+    mpvPlayer.togglePause();
 }
 
 function processRequest(request, callback) {
@@ -76,6 +62,7 @@ function registerMediaPlayerProtocol(protocol) {
 	protocol.registerStringProtocol('linuxplayer', function (request, callback) {
 		processRequest(request, callback);
 	});
+	
 }
 
 exports.registerMediaPlayerProtocol = registerMediaPlayerProtocol;
