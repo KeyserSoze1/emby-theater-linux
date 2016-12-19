@@ -176,7 +176,15 @@ define(['apphost', 'pluginManager', 'events', 'embyRouter'], function (appHost, 
 
             return 0;
         };
-
+/* 
+        self.currentTime = function (val) {
+            if (val != null) {
+                sendData("set_position", val);
+                return;
+            }
+            // needs to be in secconds
+            return playbackPosition;
+        };*/
         self.duration = function (val) {
 			//alert("duration");
             return 0;

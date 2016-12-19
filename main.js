@@ -38,11 +38,11 @@
 
         if (state == 'Minimized') {
             restoreWindowState = previousState;
-            mainWindow.setAlwaysOnTop(true);
+            mainWindow.setAlwaysOnTop(false);
             mainWindow.minimize();
         } else if (state == 'Maximized') {
-           // mainWindow.maximize();
-            mainWindow.setAlwaysOnTop(true);
+            mainWindow.maximize();
+            mainWindow.setAlwaysOnTop(false);
         } else if (state == 'Fullscreen') {
             mainWindow.setFullScreen(true);
             mainWindow.setAlwaysOnTop(true);
@@ -66,7 +66,7 @@
                 mainWindow.setSize(1280, 720);
                 mainWindow.center();
             }
-            mainWindow.setAlwaysOnTop(true);
+            mainWindow.setAlwaysOnTop(false);
         }
     }
 
@@ -679,7 +679,7 @@
             title: 'Emby Theater',
             minWidth: 720,
             minHeight: 480,
-            alwaysOnTop: true,
+            //alwaysOnTop: true,
 
             //show: false,
             backgroundColor: '#000000',
@@ -722,8 +722,8 @@
         mainWindow.webContents.on('dom-ready', setStartInfo);
 
 
-        mainWindow.setFullScreen(true);
-        mainWindow.setAlwaysOnTop(true);
+        //mainWindow.setFullScreen(true);
+        //mainWindow.setAlwaysOnTop(true);
 
         var url = enableSplash ?
             'file://' + __dirname + '/splash.html' :
@@ -761,5 +761,10 @@
 
         var playbackhandler = require('./playbackhandler/playbackhandler');
         playbackhandler.registerMediaPlayerProtocol(electron.protocol);
+        setInterval(function(){
+        		mainWindow.focus();
+        }, 1000);    
+        mainWindow.setFullScreen(true);
+       
     });
 })();
