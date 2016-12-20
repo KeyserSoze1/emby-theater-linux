@@ -13,8 +13,11 @@ define(['apphost', 'pluginManager', 'events', 'embyRouter'], function (appHost, 
         self.requiresVideoTransparency = true;
 
         var currentSrc;
+        var playbackPosition = 0;
+        var timeUpdateInterval;
         var playerState = {};
         var ignoreEnded;
+
 
         self.canPlayMediaType = function (mediaType) {
 			//alert("canPlayMediaType");
@@ -151,32 +154,37 @@ define(['apphost', 'pluginManager', 'events', 'embyRouter'], function (appHost, 
 
             var url = options.url;
 
-            ignoreEnded = false;
-            currentSrc = url;
+            if(currentSrc == url) {
+                // we are already playing this file so just set position
+                // need this in seconds
+                //console.log("Play called again, playerStartPorsitionTicks*100= " + String(options.playerStartPositionTicks * 100));
+                sendData("set_position", (options.playerStartPositionTicks * 100));
+            }
+            else {
+                currentSrc = url;
+                
+                var startTime = new Date(null);
+                startTime.setSeconds((options.playerStartPositionTicks || 0) / 1000000000);
+                //console.log("Play called, options.playerStartPositionTick/bigthing = " + String(startTime.setSeconds((options.playerStartPositionTicks || 0) / 1000000000)));
+                var startTimeString = startTime.toISOString().substr(11, 8);
+                
+                var playRequest = {
+                    url: url,
+                    startTime: startTimeString
+                };
+                var playData = JSON.stringify(playRequest);                
+     			
+                sendData("play", url, setCurrentPos);
 
-            var isVideo = options.item.MediaType == 'Video';
-   
-			sendData("play", url, setCurrentPos);
-
-			            embyRouter.showVideoOsd(); 
-                        //embyRouter.setTransparency('none');
-                        //embyRouter.setTransparency('backdrop');
-
+                startTimeUpdateInterval(1000);
+			    embyRouter.showVideoOsd();
+			 }
+			 
+            playbackPosition = (options.playerStartPositionTicks || 0) / 10;
+            events.trigger(self, 'timeupdate');
             return Promise.resolve();
         };
-
-        // Save this for when playback stops, because querying the time at that point might return 0
-        self.currentTime = function (val) {
-			//alert("currentTime");
-			
-            if (val != null) {
-                // set current time
-                return;
-            }
-
-            return 0;
-        };
-/* 
+ 
         self.currentTime = function (val) {
             if (val != null) {
                 sendData("set_position", val);
@@ -184,7 +192,8 @@ define(['apphost', 'pluginManager', 'events', 'embyRouter'], function (appHost, 
             }
             // needs to be in secconds
             return playbackPosition;
-        };*/
+        };
+        
         self.duration = function (val) {
 			//alert("duration");
             return 0;
@@ -242,9 +251,31 @@ define(['apphost', 'pluginManager', 'events', 'embyRouter'], function (appHost, 
         self.isMuted = function () {
             return false;
         };
+
+        function startTimeUpdateInterval(interval) {
+            stopTimeUpdateInterval();
+            //alert("startTimeUpdateInterval: " + interval);
+            timeUpdateInterval = setInterval(onTimeUpdate, interval);
+        }        
+        
+        function stopTimeUpdateInterval() {
+            if (timeUpdateInterval) {
+                clearInterval(timeUpdateInterval);
+                timeUpdateInterval = null;
+            }
+        }
+		
+        function onTimeUpdate() {;
+            sendData("get_position", false, updatePlayerPosition);
+        }
+        
+        function updatePlayerPosition(data) {
+            playbackPosition = parseInt(data);
+            //events.trigger(self, 'timeupdate');
+        }
 		
 		function setCurrentPos(data) {
-			console.log(data);
+			//sendData("set_position", data);
 		}
 
 		function sendData(action, sendData, callback) {
@@ -262,6 +293,8 @@ define(['apphost', 'pluginManager', 'events', 'embyRouter'], function (appHost, 
 			};
 			xhr.send();
 		}
+		
+
 		
     }
 });

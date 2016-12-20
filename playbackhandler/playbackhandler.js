@@ -1,5 +1,6 @@
 var processes = {};
 var mpv=require('node-mpv');
+var timeposition
 mpvPlayer = new mpv({
             "ipc_command" : "--input-unix-socket",
             "socket" : "/tmp/emby.sock",
@@ -9,6 +10,9 @@ mpvPlayer = new mpv({
              "--fullscreen",
              "--no-osc"
             ]);	
+mpvPlayer.on('timeposition', function (data) {
+    timeposition = data * 1000000000;
+});
 
 function play(url, callback) {
 	console.log('Play URL : ' + url);
@@ -25,6 +29,14 @@ function pause() {
 
 function pause_toggle() {
     mpvPlayer.togglePause();
+}
+
+function get_position(callback) {
+	callback(timeposition);
+}
+
+function set_position(data) {
+	mpvPlayer.goToPosition(data / 1000000000)
 }
 
 function processRequest(request, callback) {
@@ -44,6 +56,16 @@ function processRequest(request, callback) {
             stop(callback);
             callback("Stop Action");
             break;
+        case 'get_position':
+        	get_position(callback);
+        	//console.log("Get position called, timeposition = " + String(timeposition));
+        	break;
+        case 'set_position':
+        	var data = url_parts.query["data"];
+        	set_position(data);
+        	callback("Set Position Action");
+        	//console.log("Set position called, request = " + String(data));
+        	break;
         case 'pause_toggle':
             pause_toggle();
             break;             
