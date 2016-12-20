@@ -157,7 +157,7 @@ define(['apphost', 'pluginManager', 'events', 'embyRouter'], function (appHost, 
             if(currentSrc == url) {
                 // we are already playing this file so just set position
                 // need this in seconds
-                //console.log("Play called again, playerStartPorsitionTicks*100= " + String(options.playerStartPositionTicks * 100));
+                //alert("Play called again, playerStartPorsitionTicks*100= " + String(options.playerStartPositionTicks * 100));
                 sendData("set_position", (options.playerStartPositionTicks * 100));
             }
             else {
@@ -165,7 +165,7 @@ define(['apphost', 'pluginManager', 'events', 'embyRouter'], function (appHost, 
                 
                 var startTime = new Date(null);
                 startTime.setSeconds((options.playerStartPositionTicks || 0) / 1000000000);
-                //console.log("Play called, options.playerStartPositionTick/bigthing = " + String(startTime.setSeconds((options.playerStartPositionTicks || 0) / 1000000000)));
+                //alert("Play called, options.playerStartPositionTick/bigthing = " + String(startTime.setSeconds((options.playerStartPositionTicks || 0) / 1000000000)));
                 var startTimeString = startTime.toISOString().substr(11, 8);
                 
                 var playRequest = {
@@ -191,7 +191,7 @@ define(['apphost', 'pluginManager', 'events', 'embyRouter'], function (appHost, 
                 return;
             }
             // needs to be in secconds
-            return playbackPosition;
+            return playbackPosition / 1000;
         };
         
         self.duration = function (val) {
@@ -271,7 +271,7 @@ define(['apphost', 'pluginManager', 'events', 'embyRouter'], function (appHost, 
         
         function updatePlayerPosition(data) {
             playbackPosition = parseInt(data);
-            //events.trigger(self, 'timeupdate');
+            events.trigger(self, 'timeupdate');
         }
 		
 		function setCurrentPos(data) {
