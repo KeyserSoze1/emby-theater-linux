@@ -760,10 +760,8 @@
         initCec();
 
         var playbackhandler = require('./playbackhandler/playbackhandler');
-        playbackhandler.registerMediaPlayerProtocol(electron.protocol);
-        setInterval(function(){
-        		mainWindow.focus();
-        }, 1000);    
+        playbackhandler.registerMediaPlayerProtocol(electron.protocol, mainWindow);
+ 
         mainWindow.setFullScreen(true);
        
     });

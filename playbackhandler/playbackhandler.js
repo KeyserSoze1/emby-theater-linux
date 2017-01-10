@@ -1,6 +1,7 @@
 var processes = {};
 var mpv=require('node-mpv');
 var timeposition
+var mainWindowRef
 mpvPlayer = new mpv({
             "ipc_command" : "--input-unix-socket",
             "socket" : "/tmp/emby.sock",
@@ -12,6 +13,10 @@ mpvPlayer = new mpv({
             ]);	
 mpvPlayer.on('timeposition', function (data) {
     timeposition = data * 1000000000;
+});
+
+mpvPlayer.on('started', function () {
+    mainWindowRef.focus();
 });
 
 function play(url, callback) {
@@ -79,10 +84,11 @@ function processRequest(request, callback) {
 	}
 }
 
-function registerMediaPlayerProtocol(protocol) {
+function registerMediaPlayerProtocol(protocol, mainWindow) {
 
 	protocol.registerStringProtocol('linuxplayer', function (request, callback) {
 		processRequest(request, callback);
+		mainWindowRef=mainWindow;
 	});
 	
 }
