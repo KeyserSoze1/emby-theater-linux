@@ -1,23 +1,7 @@
 var processes = {};
-var mpv=require('node-mpv');
 var timeposition
 var mainWindowRef
-mpvPlayer = new mpv({
-            "ipc_command" : "--input-unix-socket",
-            "socket" : "/tmp/emby.sock",
-            "debug" : true
-            },
-            [
-             "--fullscreen",
-             "--no-osc"
-            ]);	
-mpvPlayer.on('timeposition', function (data) {
-    timeposition = data * 1000000000;
-});
-
-mpvPlayer.on('started', function () {
-    mainWindowRef.focus();
-});
+var mpvPlayer
 
 function play(url, callback) {
 	console.log('Play URL : ' + url);
@@ -84,6 +68,30 @@ function processRequest(request, callback) {
 	}
 }
 
+function initialize(playerWindow) {
+        var Long = require("long");
+	// this is Linux / little endian architecture specific
+        var longVal = Long.fromString(playerWindow.getNativeWindowHandle().swap64().toString('hex'), unsigned=true, radix=16);
+        console.log('PlayerWindowId : ' + longVal.toString());
+        var mpv=require('node-mpv');
+        mpvPlayer = new mpv({
+            "ipc_command" : "--input-unix-socket",
+            "socket" : "/tmp/emby.sock",
+            "debug" : true
+            },
+            [
+             "--wid=" + longVal.toString(),
+             "--no-osc"
+            ]);	
+	mpvPlayer.on('timeposition', function (data) {
+	    timeposition = data * 1000000000;
+	});
+
+	mpvPlayer.on('started', function () {
+	    mainWindowRef.focus();
+	});
+}
+
 function registerMediaPlayerProtocol(protocol, mainWindow) {
 
 	protocol.registerStringProtocol('linuxplayer', function (request, callback) {
@@ -93,4 +101,5 @@ function registerMediaPlayerProtocol(protocol, mainWindow) {
 	
 }
 
+exports.initialize = initialize;
 exports.registerMediaPlayerProtocol = registerMediaPlayerProtocol;

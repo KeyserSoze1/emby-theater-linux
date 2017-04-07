@@ -7,6 +7,7 @@
     // Keep a global reference of the window object, if you don't, the window will
     // be closed automatically when the JavaScript object is garbage collected.
     var mainWindow = null;
+    var playerWindow = null;
     var hasAppLoaded = false;
     var enableSplash = true;
 
@@ -715,8 +716,11 @@
             windowOptions.height = previousWindowInfo.height || 720;
         }
 
-        // Create the browser window.
-        mainWindow = new BrowserWindow(windowOptions);
+        // Create the browser window.  
+	mainWindow = new BrowserWindow(windowOptions);
+	//windowOptions.parent = mainWindow;
+        playerWindow = new BrowserWindow(windowOptions);
+        
 
         //mainWindow.openDevTools();
         mainWindow.webContents.on('dom-ready', setStartInfo);
@@ -751,7 +755,8 @@
         mainWindow.on("unmaximize", onUnMaximize);
         mainWindow.on("leave-full-screen", onLeaveFullscreen);
 
-        mainWindow.show();
+	playerWindow.show();
+	mainWindow.show();
 
         registerAppHost();
         registerFileSystem();
@@ -760,9 +765,10 @@
         initCec();
 
         var playbackhandler = require('./playbackhandler/playbackhandler');
+        playbackhandler.initialize(playerWindow);
         playbackhandler.registerMediaPlayerProtocol(electron.protocol, mainWindow);
  
-        mainWindow.setFullScreen(true);
+        //mainWindow.setFullScreen(true);
        
     });
 })();
