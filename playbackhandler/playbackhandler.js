@@ -70,14 +70,26 @@ function processRequest(request, callback) {
 
 function initialize(playerWindow) {
         var Long = require("long");
-	// this is Linux / little endian architecture specific
-        var longVal = Long.fromString(playerWindow.getNativeWindowHandle().swap64().toString('hex'), unsigned=true, radix=16);
+        var os = require("os");
+        var handle = playerWindow.getNativeWindowHandle();
+        if (os.endianness() == "LE") {
+
+            if (handle.length == 4) {
+                handle.swap32();
+            } else if (handle.length == 8) {
+                handle.swap64();
+            } else {
+                console.log("Unknown Native Window Handle Format.");
+            }
+        }
+
+        var longVal = Long.fromString(handle.toString('hex'), unsigned=true, radix=16);
         console.log('PlayerWindowId : ' + longVal.toString());
         var mpv=require('node-mpv');
         mpvPlayer = new mpv({
             "ipc_command" : "--input-unix-socket",
             "socket" : "/tmp/emby.sock",
-            "debug" : true
+            "debug" : false
             },
             [
              "--wid=" + longVal.toString(),

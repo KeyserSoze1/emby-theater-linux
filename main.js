@@ -23,6 +23,13 @@
     function onWindowMoved() {
 
         mainWindow.webContents.executeJavaScript('window.dispatchEvent(new CustomEvent("move", {}));');
+	var winPosition = mainWindow.getPosition();
+	playerWindow.setPosition(winPosition[0], winPosition[1]);
+    }
+
+    function onWindowResize() {
+	var winSize = mainWindow.getSize();
+	playerWindow.setSize(winSize[0], winSize[1]);
     }
 
     var currentWindowState = 'Normal';
@@ -540,9 +547,11 @@
                 sendCommand("previous");
                 break;
             case 'media-stop':
+		playerWindow.hide();
                 sendCommand("stop");
                 break;
             case 'media-play':
+                playerWindow.show();
                 sendCommand("play");
                 break;
             case 'media-pause':
@@ -664,19 +673,19 @@
         var windowStatePath = getWindowStateDataPath();
 
         var previousWindowInfo;
-        try {
-            previousWindowInfo = JSON.parse(require("fs").readFileSync(windowStatePath, 'utf8'));
-        }
-        catch (e) {
-            previousWindowInfo = {};
-        }
+        //try {
+        //    previousWindowInfo = JSON.parse(require("fs").readFileSync(windowStatePath, 'utf8'));
+        //}
+        //catch (e) {
+        //    previousWindowInfo = {};
+        //}
 
         var supportsTransparency = supportsTransparentWindow();
 
         var windowOptions = {
             transparent: supportsTransparency,
             frame: false,
-            resizable: true,
+            resizable: false,
             title: 'Emby Theater',
             minWidth: 720,
             minHeight: 480,
@@ -704,21 +713,22 @@
             icon: __dirname + '/icon.ico'
         };
 
-        if (previousWindowInfo.state == 'Maximized') {
+        //if (previousWindowInfo.state == 'Maximized') {
             windowOptions.width = 1280;
             windowOptions.height = 720;
-        } else if (previousWindowInfo.state == 'Fullscreen') {
-            windowOptions.fullscreen = true;
-            windowOptions.width = 1280;
-            windowOptions.height = 720;
-        } else {
-            windowOptions.width = previousWindowInfo.width || 1280;
-            windowOptions.height = previousWindowInfo.height || 720;
-        }
+        //} else if (previousWindowInfo.state == 'Fullscreen') {
+        //    windowOptions.fullscreen = true;
+        //    windowOptions.width = 1280;
+        //    windowOptions.height = 720;
+        //} else {
+        //    windowOptions.width = previousWindowInfo.width || 1280;
+        //    windowOptions.height = previousWindowInfo.height || 720;
+        //}
 
         // Create the browser window.  
 	mainWindow = new BrowserWindow(windowOptions);
-	//windowOptions.parent = mainWindow;
+	windowOptions.parent = mainWindow;
+	windowOptions.skipTaskbar = true;
         playerWindow = new BrowserWindow(windowOptions);
         
 
@@ -737,7 +747,7 @@
             firstDomDone = true;
         }
 
-        windowStateOnLoad = previousWindowInfo.state;
+        //windowStateOnLoad = previousWindowInfo.state;
 
         addPathIntercepts();
 
@@ -754,8 +764,9 @@
         mainWindow.on("restore", onRestore);
         mainWindow.on("unmaximize", onUnMaximize);
         mainWindow.on("leave-full-screen", onLeaveFullscreen);
+	mainWindow.on("resize", onWindowResize);
 
-	playerWindow.show();
+	//playerWindow.show();
 	mainWindow.show();
 
         registerAppHost();
